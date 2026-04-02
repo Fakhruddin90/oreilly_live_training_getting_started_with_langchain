@@ -17,8 +17,9 @@ load_dotenv()
 # Document Loading & Indexing (lazy — built on first tool call)
 # ---------------------------------------------------------------------------
 URLS = [
-    "https://lilianweng.github.io/posts/2023-06-23-agent/",
-    "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
+    "https://docs.langchain.com/oss/python/langchain/quickstart",
+    "https://docs.langchain.com/oss/python/langchain/agents",
+    ""
 ]
 
 _retriever = None
@@ -81,7 +82,7 @@ prompt engineering, or related topics.
 - Be concise but thorough."""
 
 agent = create_agent(
-    model=init_chat_model("openai:gpt-4o-mini"),
+    model=init_chat_model("openai:gpt-5.4-mini"),
     tools=[search_documents],
     system_prompt=SYSTEM_PROMPT,
     # No checkpointer needed — langgraph dev provides persistence automatically
