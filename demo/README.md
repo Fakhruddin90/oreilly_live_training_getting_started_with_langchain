@@ -24,17 +24,18 @@ A deployable RAG agent that answers questions about AI agent research papers.
 
    The server starts at `http://127.0.0.1:2024` with hot-reloading.
 
-4. Connect the Agent Chat UI:
+4. Connect the Agent Chat UI (pick one):
 
-   ```bash
-   npx @langchain/agent-chat-ui
-   ```
-
-   Open `http://localhost:3000`, then enter:
+   **Option A — Hosted (no install):**
+   Visit [agentchat.vercel.app](https://agentchat.vercel.app) and enter:
    - **Deployment URL**: `http://localhost:2024`
    - **Graph ID**: `chat_over_docs`
 
-   Or visit [agentchat.vercel.app](https://agentchat.vercel.app) and connect there.
+   **Option B — Local:**
+   ```bash
+   npx create-agent-chat-app@latest
+   cd agent-chat-app && npm run dev
+   ```
 
 ## Architecture
 

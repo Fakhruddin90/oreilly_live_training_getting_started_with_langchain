@@ -10,37 +10,38 @@ from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.tools import tool
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langgraph.checkpoint.memory import InMemorySaver
 
 load_dotenv()
 
 # ---------------------------------------------------------------------------
-# Document Loading & Indexing
+# Document Loading & Indexing (lazy — built on first tool call)
 # ---------------------------------------------------------------------------
 URLS = [
     "https://lilianweng.github.io/posts/2023-06-23-agent/",
     "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
 ]
 
-
-def build_vectorstore() -> Chroma:
-    """Load web documents, split them, and create a Chroma vector store."""
-    loader = WebBaseLoader(URLS)
-    docs = loader.load()
-
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    splits = splitter.split_documents(docs)
-
-    vectorstore = Chroma.from_documents(
-        documents=splits,
-        embedding=OpenAIEmbeddings(),
-        collection_name="course_docs",
-    )
-    return vectorstore
+_retriever = None
 
 
-vectorstore = build_vectorstore()
-retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
+def get_retriever():
+    """Lazily build the vector store and retriever on first use."""
+    global _retriever
+    if _retriever is None:
+        loader = WebBaseLoader(URLS)
+        docs = loader.load()
+
+        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        splits = splitter.split_documents(docs)
+
+        vectorstore = Chroma.from_documents(
+            documents=splits,
+            embedding=OpenAIEmbeddings(),
+            collection_name="course_docs",
+        )
+        _retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
+    return _retriever
+
 
 # ---------------------------------------------------------------------------
 # Tools
@@ -57,6 +58,7 @@ def search_documents(query: str) -> str:
     Args:
         query: The search query to find relevant document chunks.
     """
+    retriever = get_retriever()
     docs = retriever.invoke(query)
     return "\n\n".join(
         f"[Source: {d.metadata.get('source', 'unknown')}]\n{d.page_content}"
@@ -81,6 +83,6 @@ prompt engineering, or related topics.
 agent = create_agent(
     model=init_chat_model("openai:gpt-4o-mini"),
     tools=[search_documents],
-    prompt=SYSTEM_PROMPT,
-    checkpointer=InMemorySaver(),
+    system_prompt=SYSTEM_PROMPT,
+    # No checkpointer needed — langgraph dev provides persistence automatically
 )

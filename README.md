@@ -68,12 +68,9 @@ A complete RAG agent deployed with LangGraph, featuring:
 ```bash
 # Start the agent server
 make demo
-
-# In another terminal — launch the chat UI
-npx @langchain/agent-chat-ui
 ```
 
-Then open `http://localhost:3000` and connect to the agent.
+Then visit [agentchat.vercel.app](https://agentchat.vercel.app) and connect to `http://localhost:2024` with graph ID `chat_over_docs`.
 
 ## Previous Course Materials
 
