@@ -1,35 +1,18 @@
-ENV_NAME ?= oreilly-langchain
-PYTHON_VERSION ?= 3.12
-CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ; conda activate
+.PHONY: setup run demo clean
 
-.PHONY: all conda-create env-setup pip-tools-setup repo-setup notebook-setup env-update clean
+# Setup - install all dependencies with uv
+setup:
+	uv sync
+	@echo "Setup complete. Run 'make run' or 'uv run jupyter lab' to start."
 
-all: conda-create env-setup repo-setup notebook-setup env-update
+# Run Jupyter Lab
+run:
+	uv run jupyter lab
 
-conda-create:
-	conda create -n $(ENV_NAME) python=$(PYTHON_VERSION) -y
+# Run the demo agent locally
+demo:
+	cd demo && cp ../.env .env 2>/dev/null || true && uv run langgraph dev
 
-env-setup: conda-create
-	$(CONDA_ACTIVATE) $(ENV_NAME) && \
-	uv pip install --upgrade pip && \
-	uv pip install pip-tools setuptools ipykernel
-
-repo-setup:
-	mkdir -p requirements
-	echo "ipykernel" > requirements/requirements.in
-
-notebook-setup:
-	$(CONDA_ACTIVATE) $(ENV_NAME) && \
-	python -m ipykernel install --user --name=$(ENV_NAME)
-
-env-update:
-	$(CONDA_ACTIVATE) $(ENV_NAME) && \
-	uv pip compile ./requirements/requirements.in -o ./requirements/requirements.txt && \
-	uv pip sync ./requirements/requirements.txt
-
+# Clean up
 clean:
-	conda env remove -n $(ENV_NAME)
-
-freeze:
-	$(CONDA_ACTIVATE) $(ENV_NAME) && \
-	uv pip freeze > requirements/requirements.txt
+	rm -rf .venv uv.lock

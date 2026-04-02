@@ -35,28 +35,27 @@ O'Reilly Live Training course teaching LangChain 1.0+ and LangGraph for building
 ## Development Commands
 
 ```bash
-# Setup with Makefile (uses uv + conda)
-make all                    # Full setup: conda env, pip-tools, notebook kernel
+# Setup (uv-based)
+uv sync                     # Install all dependencies
+uv run jupyter lab           # Launch Jupyter
 
-# Manual setup
-conda create -n oreilly-langchain python=3.12
-conda activate oreilly-langchain
-pip install -r requirements/requirements.txt
-
-# Jupyter kernel
-python -m ipykernel install --user --name=oreilly-langchain
-
-# Dependency management (uses uv pip-compile)
-make env-update            # Compile and sync requirements
-make freeze                # Freeze current environment
+# Or use the Makefile
+make setup                   # uv sync
+make run                     # uv run jupyter lab
+make demo                    # Run the demo agent with langgraph dev
 ```
 
 ## Required Environment Variables
 
 ```bash
-export OPENAI_API_KEY="..."
-export TAVILY_API_KEY="..."           # For search tools
-export LANGCHAIN_API_KEY="..."        # Optional: LangSmith tracing
+# Copy .env.example and fill in your keys
+cp .env.example .env
+
+OPENAI_API_KEY="..."
+TAVILY_API_KEY="..."                  # For search tools
+LANGSMITH_API_KEY="..."               # Optional: LangSmith tracing
+LANGSMITH_TRACING=true                # Enable tracing
+LANGSMITH_PROJECT=oreilly-langchain   # Project name in LangSmith
 ```
 
 ## LangChain 1.0 Patterns (Critical)
@@ -119,15 +118,18 @@ agent.invoke({...}, context=RuntimeContext(db=db))
 
 ## Repository Structure
 
-- `notebooks/` - Main course Jupyter notebooks (numbered by module)
-- `scripts/` - Standalone Python examples (jira-agent.py, rag_methods.py)
+- `notebooks/` - Course Jupyter notebooks (1.0 Fundamentals, 2.0 Structured Outputs)
+- `demo/` - Deployable Chat-Over-Docs RAG agent (langgraph.json + agent.py)
+- `scripts/` - Standalone Python examples (supplementary reference)
+- `deprecated/` - Pre-April 2026 course notebooks
 - `archive/pre-v1/` - Legacy pre-LangChain-1.0 notebooks (reference only)
-- `requirements/` - Dependencies managed via pip-tools (requirements.in → requirements.txt)
+- `pyproject.toml` - Dependencies managed via uv
 
 ## Import Conventions
 
 ```python
 # Models
+from langchain.chat_models import init_chat_model
 from langchain_openai import ChatOpenAI
 
 # Core
@@ -137,6 +139,12 @@ from langchain_core.tools import tool
 # Agents
 from langchain.agents import create_agent
 
+# Structured Output
+from langchain.agents.structured_output import ProviderStrategy, ToolStrategy
+
 # Search (LangChain 1.0)
 from langchain_tavily import TavilySearch  # NOT langchain_community.tools.tavily_search
+
+# Memory
+from langgraph.checkpoint.memory import InMemorySaver
 ```
