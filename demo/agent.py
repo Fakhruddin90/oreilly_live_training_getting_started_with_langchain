@@ -17,9 +17,8 @@ load_dotenv()
 # Document Loading & Indexing (lazy — built on first tool call)
 # ---------------------------------------------------------------------------
 URLS = [
-    "https://docs.langchain.com/oss/python/langchain/quickstart",
-    "https://docs.langchain.com/oss/python/langchain/agents",
-    ""
+    "https://lilianweng.github.io/posts/2023-06-23-agent/",
+    "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
 ]
 
 _retriever = None
